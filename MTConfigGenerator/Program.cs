@@ -106,6 +106,8 @@
         set allowed-interface-list=listBridge
         /tool mac-server mac-winbox
         set allowed-interface-list=listBridge";
-            Console.WriteLine(configuration);
+
+        Console.WriteLine(configuration);
+        File.WriteAllText("config.rsc", configuration);
     }
 }
