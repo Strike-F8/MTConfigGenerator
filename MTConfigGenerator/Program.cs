@@ -1,18 +1,127 @@
-﻿class Program
+﻿using OpenAI_API.Moderation;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Sockets;
+
+class Program
 {
+
+    public static bool ValidateIPAddress(string ipString, string type)
+    {
+        if (!IPAddress.TryParse(ipString, out IPAddress parsedAddress))
+        {
+            Console.WriteLine($"Please enter a valid {type} IP address");
+
+            return false;
+        }
+
+        if (parsedAddress.AddressFamily == AddressFamily.InterNetwork)
+        {
+            // Check if the IP address is within the range of private IP addresses
+            byte[] bytes = parsedAddress.GetAddressBytes();
+            if (bytes[0] == 10 ||
+                (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) ||
+                (bytes[0] == 192 && bytes[1] == 168))
+            {
+                if(type == "private")
+                    return true;
+                else
+                {
+                    Console.WriteLine($"Please enter a valid {type} IP address");
+                    return false;
+                }    
+            }
+        }
+
+        // Check if the IP address is a loopback address
+        if (IPAddress.IsLoopback(parsedAddress))
+        {
+            Console.WriteLine($"Please enter a valid {type} IP address");
+
+            return false;
+        }
+
+        // Check if the IP address is a link-local address
+        if (parsedAddress.IsIPv6LinkLocal)
+        {
+            Console.WriteLine($"Please enter a valid {type} IP address");
+
+            return false;
+        }
+
+        return true;
+    }
+
+    public static string CalcPrivateNetwork(string ipString)
+    {
+        string[] address = ipString.Split('.');
+
+        address[address.Length - 1] = "0";
+
+        string result="";
+
+        foreach(string part in address)
+            result += part + ".";
+
+        return result[0..(result.Length-1)] + "/24";
+    }
+
+    public static string CalcDHCPRange(string ipString)
+    {
+        string[] address = ipString.Split(".");
+        string result = "";
+
+        for(int i = 0; i < address.Length-1; i++)
+            result += address[i] + ".";
+
+        return $"{result}10-{result}250";
+    }
+
+    public static string GetDHCPRange(string ipString)
+    {
+        string[] address = ipString.Split('.');
+
+        string begin = "";
+        for (int i = 0; i < address.Length - 1; i++)
+            begin += address[i] + ".";
+
+        Console.WriteLine("Please enter the beginning of the DHCP range");
+        Console.Write(begin);
+        string dhcpStart = Console.ReadLine();
+
+        Console.WriteLine("Please enter the end of the DHCP range\n");
+        Console.Write(begin);
+        string dhcpEnd = Console.ReadLine();
+
+        return $"{begin+dhcpStart}-{begin+dhcpEnd}";
+    }
+
     static async Task Main()
     {
         // Retrieve user inputs
-
-        Console.WriteLine("Enter the name of the router");
+        Console.WriteLine("Enter the name of the router:");
         string routerName=Console.ReadLine();
 
-        Console.WriteLine("Enter the ISP-provided IP address:");
-        string ispIpAddress=Console.ReadLine();
+        if (routerName == "")
+            routerName = "Unnamed Router";
 
-        Console.WriteLine("Enter the private IP address of the router:");
-        string privateIpAddress=Console.ReadLine();
-        string privateNetwork=privateIpAddress.Substring(0, privateIpAddress.Length-1) + "0";
+        string ispIpAddress;
+
+        do
+        {
+            Console.WriteLine("Enter the ISP-provided public IP address:");
+            ispIpAddress = Console.ReadLine();
+        } while (!ValidateIPAddress(ispIpAddress, "public"));
+
+        string privateIpAddress;
+        do
+        {
+            Console.WriteLine("Enter the private IP address of the router:");
+            privateIpAddress = Console.ReadLine();
+        } while (!ValidateIPAddress(privateIpAddress, "private"));
+
+        string privateNetwork = CalcPrivateNetwork(privateIpAddress);
+
 
         String dnsServers = "";
         //DNS
@@ -53,10 +162,13 @@
             else
                 Console.WriteLine("Please choose at least one DNS server");
         }
-        
 
-        Console.WriteLine("Enter the DHCP range (start-end):");
-        string dhcpRange=Console.ReadLine();
+        // DHCP Range
+        string dhcpRange = CalcDHCPRange(privateIpAddress);
+        Console.WriteLine($"DHCP Range is {dhcpRange}. Is this okay?");
+        string response = Console.ReadLine().ToLower();
+        if (!(response.Equals("y") || response.Equals("yes")))
+            dhcpRange = GetDHCPRange(privateIpAddress);
 
         string configuration=@$"# MikroTik configuration
         /interface bridge
@@ -85,7 +197,7 @@
         /ip dhcp-client
         add interface=ether1
         /ip dhcp-server network
-        add address={privateNetwork}/24 dns-server={dnsServers} gateway={privateIpAddress} netmask=24
+        add address={privateNetwork} dns-server={dnsServers} gateway={privateIpAddress} netmask=24
         /ip firewall filter
         add action=accept chain=input comment=""Allow SIP traffic"" dst-port=5060 in-interface=ether1 protocol=udp
         add action=accept chain=input comment=""accept established,related"" connection-state=established,related
