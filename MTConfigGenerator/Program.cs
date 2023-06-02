@@ -14,31 +14,46 @@
         string privateIpAddress=Console.ReadLine();
         string privateNetwork=privateIpAddress.Substring(0, privateIpAddress.Length-1) + "0";
 
-        Console.WriteLine("Enter the DNS servers provided by the ISP (comma-separated or leave blank):");
-        string dnsServers=Console.ReadLine();
-
-        Console.WriteLine("Would you like to add Google's DNS servers? (8.8.8.8,8.8.4.4)");
-        string googleDNS=Console.ReadLine();
-
-        if(googleDNS.ToLower().Equals("y") || googleDNS.ToLower().Equals("yes") || googleDNS == null)
+        String dnsServers = "";
+        //DNS
+        while(true)
         {
+            Console.WriteLine("Enter the DNS servers provided by the ISP (comma-separated or leave blank):");
+            dnsServers = Console.ReadLine();
+
+            Console.WriteLine("Would you like to add Google's DNS servers? (8.8.8.8,8.8.4.4)");
+            string googleDNS = Console.ReadLine();
+
+            if (googleDNS.ToLower().Equals("y") || googleDNS.ToLower().Equals("yes") || googleDNS == null)
+            {
+                if (dnsServers != "")
+                    dnsServers += ",";
+
+                Console.WriteLine("Adding Google DNS");
+                dnsServers += "8.8.8.8,8.8.4.4";
+            }
+            else
+                Console.WriteLine("Skipping Google DNS");
+
+            Console.WriteLine("Would you like to add OpenDNS's DNS servers? (208.67.222.222,208.67.220.220)");
+            string openDNS = Console.ReadLine();
+            if (openDNS.ToLower().Equals("y") || openDNS.ToLower().Equals("yes") || openDNS == null)
+            {
+                if (dnsServers != "")
+                    dnsServers += ",";
+
+                Console.WriteLine("Adding openDNS");
+                dnsServers += "208.67.222.222,208.67.220.220";
+            }
+            else
+                Console.WriteLine("Skipping openDNS");
+
             if (dnsServers != "")
-                dnsServers += ",";
-
-            Console.WriteLine("Adding Google DNS");
-            dnsServers += "8.8.8.8,8.8.4.4";
+                break;
+            else
+                Console.WriteLine("Please choose at least one DNS server");
         }
-
-        Console.WriteLine("Would you like to add OpenDNS's DNS servers? (208.67.222.222,208.67.220.220)");
-        string openDNS=Console.ReadLine();
-        if (openDNS.ToLower().Equals("y") || openDNS.ToLower().Equals("yes") || openDNS == null)
-        {
-            if (dnsServers != "")
-                dnsServers += ",";
-
-            Console.WriteLine("Adding openDNS");
-            dnsServers += "208.67.222.222,208.67.220.220";
-        }
+        
 
         Console.WriteLine("Enter the DHCP range (start-end):");
         string dhcpRange=Console.ReadLine();
