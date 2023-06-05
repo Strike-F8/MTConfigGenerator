@@ -63,7 +63,7 @@ class Program
         foreach(string part in address)
             result += part + ".";
 
-        return result[0..(result.Length-1)] + "/24";
+        return result[0..(result.Length-1)];
     }
 
     public static string CalcDHCPRange(string ipString)
@@ -108,12 +108,6 @@ class Program
             routerName = "Unnamed Router";
 
         string ispIpAddress;
-
-        do
-        {
-            Console.WriteLine("Enter the ISP-provided public IP address:");
-            ispIpAddress = Console.ReadLine();
-        } while (!ValidateIPAddress(ispIpAddress, "public"));
 
         string privateIpAddress;
         do
@@ -176,8 +170,6 @@ class Program
         /interface bridge
         add name=local
         /interface list
-        add name=WAN
-        add name=LAN
         add name=listBridge
         /interface list member add list=listBridge interface=local
         /ip pool
@@ -199,7 +191,7 @@ class Program
         /ip dhcp-client
         add interface=ether1
         /ip dhcp-server network
-        add address={privateNetwork} dns-server={dnsServers} gateway={privateIpAddress} netmask=24
+        add address={privateNetwork}/24 dns-server={dnsServers} gateway={privateIpAddress} netmask=24
         /ip firewall filter
         add action=accept chain=input comment=""Allow SIP traffic"" dst-port=5060 in-interface=ether1 protocol=udp
         add action=accept chain=input comment=""accept established,related"" connection-state=established,related
