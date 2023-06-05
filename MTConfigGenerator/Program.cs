@@ -68,6 +68,7 @@ class Program
 
     public static string CalcDHCPRange(string ipString)
     {
+        // Calculate the default DHCP range
         string[] address = ipString.Split(".");
         string result = "";
 
@@ -79,6 +80,7 @@ class Program
 
     public static string GetDHCPRange(string ipString)
     {
+        // Get a DHCP range from the user
         string[] address = ipString.Split('.');
 
         string begin = "";
@@ -131,9 +133,9 @@ class Program
             dnsServers = Console.ReadLine();
 
             Console.WriteLine("Would you like to add Google's DNS servers? (8.8.8.8,8.8.4.4)");
-            string googleDNS = Console.ReadLine();
+            string googleDNS = Console.ReadLine().ToLower();
 
-            if (googleDNS.ToLower().Equals("y") || googleDNS.ToLower().Equals("yes") || googleDNS == null)
+            if (googleDNS.Equals("y") || googleDNS.Equals("yes") || googleDNS == null)
             {
                 if (dnsServers != "")
                     dnsServers += ",";
@@ -145,8 +147,8 @@ class Program
                 Console.WriteLine("Skipping Google DNS");
 
             Console.WriteLine("Would you like to add OpenDNS's DNS servers? (208.67.222.222,208.67.220.220)");
-            string openDNS = Console.ReadLine();
-            if (openDNS.ToLower().Equals("y") || openDNS.ToLower().Equals("yes") || openDNS == null)
+            string openDNS = Console.ReadLine().ToLower();
+            if (openDNS.Equals("y") || openDNS.Equals("yes") || openDNS == null)
             {
                 if (dnsServers != "")
                     dnsServers += ",";
