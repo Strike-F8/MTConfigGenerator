@@ -1,6 +1,4 @@
-﻿using OpenAI_API.Moderation;
-using System.Net;
-using System.Net.Http.Headers;
+﻿using System.Net;
 using System.Net.Sockets;
 
 class Program
@@ -117,12 +115,12 @@ class Program
         } while (!ValidateIPAddress(privateIpAddress, "private"));
 
         string privateNetwork = CalcPrivateNetwork(privateIpAddress);
-
-
-        String dnsServers = "";
+       
         //DNS
+        String dnsServers = "";
         while(true)
         {
+            // Loop until the user provides at least one DNS server
             Console.WriteLine("Enter the DNS servers provided by the ISP (comma-separated or leave blank):");
             dnsServers = Console.ReadLine();
 
@@ -214,6 +212,6 @@ class Program
         set allowed-interface-list=listBridge";
 
         Console.WriteLine(configuration);
-        File.WriteAllText("config.rsc", configuration);
+        File.WriteAllText($"{routerName}.rsc", configuration);
     }
 }
