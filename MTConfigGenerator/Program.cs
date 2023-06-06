@@ -212,6 +212,20 @@ class Program
         set allowed-interface-list=listBridge";
 
         Console.WriteLine(configuration);
-        File.WriteAllText($"{routerName}.rsc", configuration);
+        Console.WriteLine($"Write this configuration file to {routerName}.rsc?");
+        response = Console.ReadLine().ToLower();
+        if(response.Equals("y") || response.Equals("yes"))
+        {
+            Console.WriteLine($"Writing configuration file to {routerName}.rsc");
+            File.WriteAllText($"{routerName}.rsc", configuration);
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
+        }
+        else
+        {
+            Console.WriteLine("Configuration not written to file");
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
+        }
     }
 }
