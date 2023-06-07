@@ -6,15 +6,16 @@ C# script that asks the user for configuration information and then produces a c
 
 ### Requirements
 The outputted configuration file has only been tested to work with RouterOS 7
+To prevent errors, only use the generated config file on a completely blank router.
+You will need to reset the configuration and remove the default configuration after the router reboots.
 
 ### Config Template
 The following is the config template used by the script
 ```
- @$"/interface bridge
+@$"# MikroTik configuration
+        /interface bridge
         add name=local
         /interface list
-        add name=WAN
-        add name=LAN
         add name=listBridge
         /interface list member add list=listBridge interface=local
         /ip pool
@@ -36,7 +37,7 @@ The following is the config template used by the script
         /ip dhcp-client
         add interface=ether1
         /ip dhcp-server network
-        add address={privateNetwork} dns-server={dnsServers} gateway={privateIpAddress} netmask=24
+        add address={privateNetwork}/24 dns-server={dnsServers} gateway={privateIpAddress} netmask=24
         /ip firewall filter
         add action=accept chain=input comment=""Allow SIP traffic"" dst-port=5060 in-interface=ether1 protocol=udp
         add action=accept chain=input comment=""accept established,related"" connection-state=established,related
@@ -56,5 +57,5 @@ The following is the config template used by the script
         /tool mac-server
         set allowed-interface-list=listBridge
         /tool mac-server mac-winbox
-        set allowed-interface-list=listBridge"
+        set allowed-interface-list=listBridge";
  
