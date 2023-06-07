@@ -99,7 +99,7 @@ class Program
     static async Task Main()
     {
         // Retrieve user inputs
-        Console.WriteLine("Enter the name of the router:");
+        Console.WriteLine("Enter the name of the router: (Default: Unnamed Router)");
         string routerName=Console.ReadLine();
 
         if (routerName == "")
@@ -110,8 +110,10 @@ class Program
         string privateIpAddress;
         do
         {
-            Console.WriteLine("Enter the private IP address of the router:");
+            Console.WriteLine("Enter the private IP address of the router: (Default: 192.168.89.1)");
             privateIpAddress = Console.ReadLine();
+            if(privateIpAddress.Equals(""))
+                privateIpAddress = "192.168.89.1";
         } while (!ValidateIPAddress(privateIpAddress, "private"));
 
         string privateNetwork = CalcPrivateNetwork(privateIpAddress);
@@ -127,7 +129,7 @@ class Program
             Console.WriteLine("Would you like to add Google's DNS servers? (8.8.8.8,8.8.4.4)");
             string googleDNS = Console.ReadLine().ToLower();
 
-            if (googleDNS.Equals("y") || googleDNS.Equals("yes") || googleDNS == null)
+            if (googleDNS.Equals("y") || googleDNS.Equals("yes") || googleDNS.Equals(""))
             {
                 if (dnsServers != "")
                     dnsServers += ",";
@@ -140,7 +142,7 @@ class Program
 
             Console.WriteLine("Would you like to add OpenDNS's DNS servers? (208.67.222.222,208.67.220.220)");
             string openDNS = Console.ReadLine().ToLower();
-            if (openDNS.Equals("y") || openDNS.Equals("yes") || openDNS == null)
+            if (openDNS.Equals("y") || openDNS.Equals("yes") || openDNS.Equals(""))
             {
                 if (dnsServers != "")
                     dnsServers += ",";
@@ -161,7 +163,7 @@ class Program
         string dhcpRange = CalcDHCPRange(privateIpAddress);
         Console.WriteLine($"DHCP Range is {dhcpRange}. Is this okay?");
         string response = Console.ReadLine().ToLower();
-        if (!(response.Equals("y") || response.Equals("yes")))
+        if (!(response.Equals("y") || response.Equals("yes") || response.Equals("")))
             dhcpRange = GetDHCPRange(privateIpAddress);
 
         string configuration=@$"# MikroTik configuration
@@ -214,7 +216,7 @@ class Program
         Console.WriteLine(configuration);
         Console.WriteLine($"Write this configuration file to {routerName}.rsc?");
         response = Console.ReadLine().ToLower();
-        if(response.Equals("y") || response.Equals("yes"))
+        if(response.Equals("y") || response.Equals("yes") || response.Equals(""))
         {
             Console.WriteLine($"Writing configuration file to {routerName}.rsc");
             File.WriteAllText($"{routerName}.rsc", configuration);
