@@ -3,9 +3,16 @@ using System.Net.Sockets;
 
 class Program
 {
-
+    /// <summary>
+    /// Checks if the provided IP address is valid. The type parameter can either be "private" or "public"
+    /// The method checks if the provided IP address is a valid private or public address according to the passed in type
+    /// </summary>
+    /// <param name="ipString"></param>
+    /// <param name="type"></param>
+    /// <returns>True or False</returns>
     public static bool ValidateIPAddress(string ipString, string type)
     {
+        // Check if the input is an IP address
         if (!IPAddress.TryParse(ipString, out IPAddress parsedAddress))
         {
             Console.WriteLine($"Please enter a valid {type} IP address");
@@ -49,7 +56,11 @@ class Program
 
         return true;
     }
-
+    /// <summary>
+    /// Calculate the router's private network based on the provided private IP address
+    /// </summary>
+    /// <param name="ipString"></param>
+    /// <returns>Returns a /24 network</returns>
     public static string CalcPrivateNetwork(string ipString)
     {
         string[] address = ipString.Split('.');
@@ -64,6 +75,11 @@ class Program
         return result[0..(result.Length-1)];
     }
 
+    /// <summary>
+    /// Calculate the default DHCP range based on the private subnet
+    /// </summary>
+    /// <param name="ipString"></param>
+    /// <returns></returns>
     public static string CalcDHCPRange(string ipString)
     {
         // Calculate the default DHCP range
@@ -76,6 +92,11 @@ class Program
         return $"{result}10-{result}250";
     }
 
+    /// <summary>
+    /// If the user wants to change the default DHCP range, ask for it here.
+    /// </summary>
+    /// <param name="ipString"></param>
+    /// <returns></returns>
     public static string GetDHCPRange(string ipString)
     {
         // Get a DHCP range from the user
@@ -102,10 +123,8 @@ class Program
         Console.WriteLine("Enter the name of the router: (Default: Unnamed Router)");
         string routerName=Console.ReadLine();
 
-        if (routerName == "")
+        if (routerName.Equals(""))
             routerName = "Unnamed Router";
-
-        string ispIpAddress;
 
         string privateIpAddress;
         do
@@ -114,7 +133,7 @@ class Program
             privateIpAddress = Console.ReadLine();
             if(privateIpAddress.Equals(""))
                 privateIpAddress = "192.168.89.1";
-        } while (!ValidateIPAddress(privateIpAddress, "private"));
+        } while (!ValidateIPAddress(privateIpAddress, "private")); // Loop if the provided address is not valid
 
         string privateNetwork = CalcPrivateNetwork(privateIpAddress);
        
@@ -131,6 +150,7 @@ class Program
 
             if (googleDNS.Equals("y") || googleDNS.Equals("yes") || googleDNS.Equals(""))
             {
+                // Only add a comma if the list of addresses is not empty. Else, the list will begin with a comma and cause an error
                 if (dnsServers != "")
                     dnsServers += ",";
 
@@ -153,6 +173,7 @@ class Program
             else
                 Console.WriteLine("Skipping openDNS");
 
+            // Loop if the user didn't provide any DNS servers
             if (dnsServers != "")
                 break;
             else
